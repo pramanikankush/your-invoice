@@ -1,0 +1,90 @@
+# Environment Variables - NEVER COMMIT
+.env
+.env.local
+.env.production
+*.env
+
+# Database - Contains Encrypted API Keys
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Uploads - May Contain Sensitive Documents
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs - May Contain Sensitive Info
+*.log
+logs/
+
+# Security
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Deployment
+*.pid
+*.sock
+.vercel
+.railway
+.render
+
+# Local Development Scripts
+create_test_user.py
+fix_delete.py
+init_db.py
+migrate_db.py
+update_api_key_encryption.py
+run_with_supabase.py

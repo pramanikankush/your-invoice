@@ -1,0 +1,105 @@
+/* Custom styles for Smart Invoice Scanner with Tailwind CSS */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Animated Button Styles */
+button, .btn-animated {
+    padding: 17px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    border: 0;
+    background-color: white;
+    box-shadow: rgb(0 0 0 / 5%) 0 0 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 15px;
+    transition: all 0.5s ease;
+}
+
+button:hover, .btn-animated:hover {
+    letter-spacing: 3px;
+    box-shadow: 0px 7px 29px 0px;
+    transform: translateY(-2px);
+}
+
+button:active, .btn-animated:active {
+    letter-spacing: 3px;
+    box-shadow: 0px 0px 0px 0px;
+    transform: translateY(10px);
+    transition: 100ms;
+}
+
+/* Primary Button (Blue) */
+.btn-primary, button[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover, button[type="submit"]:hover {
+    background-color: hsl(217deg 91% 60%);
+    box-shadow: rgb(59 130 246) 0px 7px 29px 0px;
+}
+
+/* Success Button (Green) */
+.btn-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: hsl(160deg 84% 39%);
+    box-shadow: rgb(16 185 129) 0px 7px 29px 0px;
+}
+
+/* Warning Button (Yellow) */
+.btn-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: hsl(38deg 92% 50%);
+    box-shadow: rgb(245 158 11) 0px 7px 29px 0px;
+}
+
+/* Danger Button (Red) */
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: hsl(0deg 84% 60%);
+    box-shadow: rgb(239 68 68) 0px 7px 29px 0px;
+}
+
+/* Purple Button */
+.btn-purple {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.btn-purple:hover {
+    background-color: hsl(261deg 80% 48%);
+    box-shadow: rgb(93 24 220) 0px 7px 29px 0px;
+}
+
+/* Secondary Button (Gray) */
+.btn-secondary {
+    background-color: #6b7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: hsl(220deg 9% 46%);
+    box-shadow: rgb(107 114 128) 0px 7px 29px 0px;
+}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Upload - Smart Invoice Scanner{% endblock %}
+
+{% block content %}
+<header class="mb-12">
+    <h1 class="text-3xl md:text-4xl font-bold text-text-light-primary dark:text-dark-primary flex items-center">
+        <span class="material-icons-outlined text-3xl md:text-4xl mr-3">cloud_upload</span>
+        Bulk Upload Invoices
+    </h1>
+</header>
+
+<div class="max-w-3xl mx-auto">
+    <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-2xl p-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div>
+                <label for="files" class="block text-lg font-semibold text-text-light-primary dark:text-dark-primary mb-4">Select Multiple Invoices</label>
+                <div class="border-2 border-dashed border-primary/50 rounded-lg p-8 text-center hover:border-primary transition-all duration-300">
+                    <span class="material-icons-outlined text-primary text-6xl mb-4 inline-block">upload_file</span>
+                    <input type="file" id="files" name="files" accept=".png,.jpg,.jpeg,.pdf" multiple required class="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                    <p class="text-text-light-secondary dark:text-dark-secondary text-sm mt-4">
+                        Select multiple files (PNG, JPG, JPEG, PDF)
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-blue-100/50 dark:bg-blue-900/20 rounded-lg p-6">
+                <div class="flex items-start">
+                    <span class="material-icons-outlined text-primary text-3xl mr-4">info</span>
+                    <div>
+                        <h3 class="font-semibold text-text-light-primary dark:text-dark-primary mb-2">Bulk Processing</h3>
+                        <p class="text-text-light-secondary dark:text-dark-secondary">All selected invoices will be processed automatically using AI. This may take a few moments depending on the number of files.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button type="submit" class="btn-animated flex-1 py-3 bg-primary text-white rounded-lg font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+                    <span class="material-icons-outlined">upload</span>
+                    <span>Upload All</span>
+                </button>
+                <a href="{{ url_for('main.dashboard') }}" class="btn-animated px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2">
+                    <span class="material-icons-outlined">arrow_back</span>
+                    <span>Back</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

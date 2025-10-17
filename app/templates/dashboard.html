@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Invoice Scanner{% endblock %}
+
+{% block content %}
+<header class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-text-light-primary dark:text-dark-primary flex items-center">
+        <span class="material-icons-outlined text-3xl md:text-4xl mr-3">dashboard</span>
+        Dashboard
+    </h1>
+    <div class="flex gap-3">
+        <a href="{{ url_for('invoice.upload') }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">add</span>
+            <span class="font-semibold">Upload</span>
+        </a>
+        <a href="{{ url_for('invoice.bulk_upload') }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-purple-500 text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">cloud_upload</span>
+            <span class="font-semibold">Bulk Upload</span>
+        </a>
+        {% if invoices %}
+        <a href="{{ url_for('invoice.export_all') }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">download</span>
+            <span class="font-semibold">Export All</span>
+        </a>
+        {% endif %}
+    </div>
+</header>
+
+<div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6 mb-6">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <input type="text" name="search" placeholder="Search invoices..." value="{{ request.args.get('search', '') }}" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+        <select name="category" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <select name="status" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="">All Status</option>
+            <option value="Processed" {% if request.args.get('status') == 'Processed' %}selected{% endif %}>Processed</option>
+            <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="Paid" {% if request.args.get('status') == 'Paid' %}selected{% endif %}>Paid</option>
+            <option value="Overdue" {% if request.args.get('status') == 'Overdue' %}selected{% endif %}>Overdue</option>
+        </select>
+        <select name="sort_by" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>Date Uploaded</option>
+            <option value="invoice_date" {% if request.args.get('sort_by') == 'invoice_date' %}selected{% endif %}>Invoice Date</option>
+            <option value="vendor_name" {% if request.args.get('sort_by') == 'vendor_name' %}selected{% endif %}>Vendor</option>
+            <option value="total_amount" {% if request.args.get('sort_by') == 'total_amount' %}selected{% endif %}>Amount</option>
+        </select>
+        <button type="submit" class="btn-animated px-4 py-2 bg-primary text-white rounded-lg transition-all flex items-center justify-center gap-2">
+            <span class="material-icons-outlined">search</span>
+            <span>Filter</span>
+        </button>
+    </form>
+</div>
+
+<section>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-text-light-primary dark:text-dark-primary">Invoice History ({{ invoices|length }})</h2>
+        {% if invoices %}
+        <div class="flex gap-2">
+            <button onclick="toggleBulkActions()" class="btn-animated px-4 py-2 bg-blue-500 text-white rounded-lg transition-all flex items-center gap-2">
+                <span class="material-icons-outlined">checklist</span>
+                <span>Bulk Actions</span>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div id="bulkActionsPanel" class="hidden bg-yellow-100 dark:bg-yellow-900/20 rounded-lg p-4 mb-4">
+        <form method="POST" action="{{ url_for('invoice.bulk_categorize') }}" class="flex gap-2 items-center">
+            <input type="text" name="category" placeholder="Category name" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+            <button type="submit" class="btn-animated px-4 py-2 bg-green-500 text-white rounded-lg">Categorize Selected</button>
+            <button type="button" onclick="submitBulkDelete()" class="btn-animated px-4 py-2 bg-red-500 text-white rounded-lg">Delete Selected</button>
+        </form>
+    </div>
+    
+    <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-8 transform transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl">
+        {% if invoices %}
+        <form id="bulkForm" method="POST">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="border-b border-border-light dark:border-border-dark">
+                    <tr class="text-left">
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Invoice #</th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Date</th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Vendor</th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Category</th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Status</th>
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Total</th>
+                        {% if current_user.is_admin() %}
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">User</th>
+                        {% endif %}
+                        <th class="pb-4 font-semibold text-text-light-primary dark:text-dark-primary">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="border-b border-border-light dark:border-border-dark hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <td class="py-4"><input type="checkbox" name="invoice_ids" value="{{ invoice.id }}" class="invoice-checkbox"></td>
+                        <td class="py-4 text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.invoice_number or 'N/A' }}</td>
+                        <td class="py-4 text-text-light-secondary dark:text-dark-secondary">{{ invoice.invoice_date or 'N/A' }}</td>
+                        <td class="py-4 text-text-light-secondary dark:text-dark-secondary">{{ invoice.vendor_name or 'N/A' }}</td>
+                        <td class="py-4"><span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs">{{ invoice.category or 'Uncategorized' }}</span></td>
+                        <td class="py-4"><span class="px-2 py-1 {% if invoice.status == 'Paid' %}bg-green-100 text-green-800{% elif invoice.status == 'Overdue' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %} rounded text-xs">{{ invoice.status or 'Processed' }}</span></td>
+                        <td class="py-4 text-text-light-primary dark:text-dark-primary font-bold">{{ invoice.total_amount or 'N/A' }}</td>
+                        {% if current_user.is_admin() %}
+                        <td class="py-4 text-text-light-secondary dark:text-dark-secondary">{{ invoice.user.username }}</td>
+                        {% endif %}
+                        <td class="py-4">
+                            <div class="flex gap-2">
+                                <a href="{{ url_for('invoice.view', invoice_id=invoice.id) }}" class="btn-animated p-2 bg-blue-500 text-white rounded-lg transition-colors">
+                                    <span class="material-icons-outlined text-sm">visibility</span>
+                                </a>
+                                <a href="{{ url_for('invoice.edit', invoice_id=invoice.id) }}" class="btn-animated p-2 bg-yellow-500 text-white rounded-lg transition-colors">
+                                    <span class="material-icons-outlined text-sm">edit</span>
+                                </a>
+                                <a href="{{ url_for('invoice.export', invoice_id=invoice.id) }}" class="btn-animated p-2 bg-green-500 text-white rounded-lg transition-colors">
+                                    <span class="material-icons-outlined text-sm">download</span>
+                                </a>
+                                <form method="POST" action="{{ url_for('invoice.delete', invoice_id=invoice.id) }}" style="display:inline;">
+                                    <button type="submit" onclick="return confirm('Delete this invoice?')" class="btn-animated p-2 bg-red-500 text-white rounded-lg transition-colors">
+                                        <span class="material-icons-outlined text-sm">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </form>
+        {% else %}
+        <div class="flex items-center justify-center text-center p-12 bg-blue-100/50 dark:bg-blue-900/20 rounded-lg">
+            <div class="flex flex-col items-center">
+                <span class="material-icons-outlined text-5xl text-primary mb-4">info</span>
+                <p class="text-text-light-secondary dark:text-dark-secondary">
+                    No invoices uploaded yet. 
+                    <a class="text-primary font-semibold hover:underline" href="{{ url_for('invoice.upload') }}">Upload your first invoice</a>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function toggleBulkActions() {
+    const panel = document.getElementById('bulkActionsPanel');
+    panel.classList.toggle('hidden');
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.invoice-checkbox');
+    const selectAll = document.getElementById('selectAll');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+}
+
+function submitBulkDelete() {
+    const form = document.getElementById('bulkForm');
+    const checked = document.querySelectorAll('.invoice-checkbox:checked');
+    if (checked.length === 0) {
+        alert('Please select at least one invoice');
+        return;
+    }
+    if (confirm(`Delete ${checked.length} selected invoices?`)) {
+        form.action = "{{ url_for('invoice.bulk_delete') }}";
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

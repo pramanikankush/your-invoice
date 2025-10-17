@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Invoice Scanner{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <style>
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltiptext {
+            visibility: hidden; width: 120px; background-color: #555; color: #fff;
+            text-align: center; border-radius: 6px; padding: 5px 0;
+            position: absolute; z-index: 1; bottom: 125%; left: 50%;
+            margin-left: -60px; opacity: 0; transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        
+        /* Animated Button Styles */
+        button, a.btn-animated {
+            letter-spacing: 1.5px;
+            transition: all 0.5s ease;
+        }
+        button:hover, a.btn-animated:hover {
+            letter-spacing: 3px;
+            transform: translateY(-2px);
+        }
+        button:active, a.btn-animated:active {
+            transform: translateY(5px);
+            transition: 100ms;
+        }
+        
+        /* Color-specific shadows */
+        .bg-primary:hover, .bg-blue-500:hover { box-shadow: rgb(59 130 246) 0px 7px 29px 0px !important; }
+        .bg-green-500:hover { box-shadow: rgb(16 185 129) 0px 7px 29px 0px !important; }
+        .bg-yellow-500:hover { box-shadow: rgb(245 158 11) 0px 7px 29px 0px !important; }
+        .bg-red-500:hover { box-shadow: rgb(239 68 68) 0px 7px 29px 0px !important; }
+        .bg-purple-500:hover { box-shadow: rgb(139 92 246) 0px 7px 29px 0px !important; }
+        .bg-gray-500:hover { box-shadow: rgb(107 114 128) 0px 7px 29px 0px !important; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        "background-light": "#f0f4f8",
+                        "background-dark": "#0a0e14",
+                        "card-light": "rgba(255, 255, 255, 0.6)",
+                        "card-dark": "rgba(10, 25, 47, 0.6)",
+                        "border-light": "rgba(255, 255, 255, 0.2)",
+                        "border-dark": "rgba(255, 255, 255, 0.1)",
+                        "text-light-primary": "#1e293b",
+                        "text-light-secondary": "#64748b",
+                        "text-dark-primary": "#e2e8f0",
+                        "text-dark-secondary": "#94a3b8",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] },
+                    borderRadius: { DEFAULT: "12px" },
+                    backdropBlur: { 'xl': '24px' },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="font-display bg-gradient-to-br from-blue-100 via-white to-gray-100 dark:from-gray-900 dark:via-background-dark dark:to-blue-900/20 text-text-light-primary dark:text-dark-primary transition-colors duration-300">
+    {% if current_user.is_authenticated %}
+    <div class="flex h-screen">
+        <aside class="w-20 flex flex-col items-center py-6 bg-card-light/50 dark:bg-card-dark/50 backdrop-blur-xl border-r border-border-light dark:border-border-dark">
+            <div class="flex items-center justify-center mb-12">
+                <span class="material-icons-outlined text-primary text-3xl">document_scanner</span>
+            </div>
+            <nav class="flex flex-col items-center space-y-6">
+                <div class="tooltip">
+                    <a class="flex items-center justify-center p-3 rounded-lg {% if request.endpoint == 'main.dashboard' %}bg-primary/20 text-primary{% else %}text-text-light-secondary dark:text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-all duration-300" href="{{ url_for('main.dashboard') }}">
+                        <span class="material-icons-outlined">dashboard</span>
+                    </a>
+                    <span class="tooltiptext">Dashboard</span>
+                </div>
+                <div class="tooltip">
+                    <a class="flex items-center justify-center p-3 rounded-lg {% if request.endpoint == 'invoice.upload' %}bg-primary/20 text-primary{% else %}text-text-light-secondary dark:text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-all duration-300" href="{{ url_for('invoice.upload') }}">
+                        <span class="material-icons-outlined">cloud_upload</span>
+                    </a>
+                    <span class="tooltiptext">Upload Invoice</span>
+                </div>
+                <div class="tooltip">
+                    <a class="flex items-center justify-center p-3 rounded-lg {% if request.endpoint == 'invoice.bulk_upload' %}bg-primary/20 text-primary{% else %}text-text-light-secondary dark:text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700{% endif %} transition-all duration-300" href="{{ url_for('invoice.bulk_upload') }}">
+                        <span class="material-icons-outlined">upload_file</span>
+                    </a>
+                    <span class="tooltiptext">Bulk Upload</span>
+                </div>
+                {% if current_user.is_admin() %}
+                <div class="tooltip">
+                    <a class="flex items-center justify-center p-3 rounded-lg text-text-light-secondary dark:text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300" href="#">
+                        <span class="material-icons-outlined">admin_panel_settings</span>
+                    </a>
+                    <span class="tooltiptext">Admin</span>
+                </div>
+                {% endif %}
+            </nav>
+            <div class="mt-auto tooltip">
+                <a class="flex items-center justify-center p-3 rounded-lg text-text-light-secondary dark:text-dark-secondary hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300" href="{{ url_for('auth.logout') }}">
+                    <span class="material-icons-outlined">logout</span>
+                </a>
+                <span class="tooltiptext">Logout</span>
+            </div>
+        </aside>
+        <main class="flex-1 p-8 md:p-12 overflow-y-auto">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% elif category == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %} flex items-center justify-between">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="ml-4">
+                            <span class="material-icons-outlined">close</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+    <div class="min-h-screen flex items-center justify-center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="absolute top-4 right-4 space-y-2">
+                    {% for category, message in messages %}
+                    <div class="p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% elif category == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %} flex items-center">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="ml-4">
+                            <span class="material-icons-outlined">close</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block auth_content %}{% endblock %}
+    </div>
+    {% endif %}
+    {% block scripts %}{% endblock %}
+</body>
+</html>

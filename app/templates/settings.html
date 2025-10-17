@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Smart Invoice Scanner{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-2xl p-8">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-text-light-primary dark:text-dark-primary mb-2">Account Settings</h2>
+            <p class="text-text-light-secondary dark:text-dark-secondary">Manage your account and API key</p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4">Account Information</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm font-medium text-text-light-secondary dark:text-dark-secondary">Username</label>
+                        <p class="text-text-light-primary dark:text-dark-primary">{{ current_user.username }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-text-light-secondary dark:text-dark-secondary">Email</label>
+                        <p class="text-text-light-primary dark:text-dark-primary">{{ current_user.email }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-text-light-secondary dark:text-dark-secondary">Role</label>
+                        <p class="text-text-light-primary dark:text-dark-primary">{{ current_user.role|capitalize }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4">Gemini API Key</h3>
+                <form method="POST" action="{{ url_for('auth.update_api_key') }}" class="space-y-4">
+                    <div>
+                        <label for="gemini_api_key" class="block text-sm font-medium text-text-light-primary dark:text-dark-primary mb-2">
+                            API Key
+                            {% if current_user.gemini_api_key %}
+                            <span class="text-green-500 text-xs ml-2">✓ Configured</span>
+                            {% else %}
+                            <span class="text-red-500 text-xs ml-2">✗ Not Set</span>
+                            {% endif %}
+                        </label>
+                        <input type="password" id="gemini_api_key" name="gemini_api_key" placeholder="AIzaSy..." class="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all" minlength="30">
+                        <p class="text-xs text-text-light-secondary dark:text-dark-secondary mt-1">
+                            Get your API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Google AI Studio</a>
+                        </p>
+                    </div>
+                    <button type="submit" class="btn-animated px-6 py-2 bg-primary text-white rounded-lg font-semibold shadow-lg transition-all duration-300">
+                        Update API Key
+                    </button>
+                </form>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4">Security</h3>
+                <p class="text-sm text-text-light-secondary dark:text-dark-secondary mb-4">
+                    Your API key is encrypted and stored securely. It's never shared or exposed.
+                </p>
+                <a href="{{ url_for('auth.logout') }}" class="inline-block px-6 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-all duration-300">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

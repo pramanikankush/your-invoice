@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice Details - Smart Invoice Scanner{% endblock %}
+
+{% block content %}
+<header class="flex justify-between items-center mb-12">
+    <h1 class="text-3xl md:text-4xl font-bold text-text-light-primary dark:text-dark-primary flex items-center">
+        <span class="material-icons-outlined text-3xl md:text-4xl mr-3">receipt</span>
+        Invoice Details
+    </h1>
+    <div class="flex gap-3">
+        <a href="{{ url_for('invoice.edit', invoice_id=invoice.id) }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-yellow-500 text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">edit</span>
+            <span class="font-semibold">Edit</span>
+        </a>
+        <a href="{{ url_for('invoice.export', invoice_id=invoice.id) }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">download</span>
+            <span class="font-semibold">Export Excel</span>
+        </a>
+        <a href="{{ url_for('main.dashboard') }}" class="btn-animated flex items-center gap-2 px-4 py-3 bg-gray-500 text-white rounded-lg shadow-lg transition-all duration-300">
+            <span class="material-icons-outlined">arrow_back</span>
+            <span class="font-semibold">Back</span>
+        </a>
+    </div>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="space-y-6">
+        <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+                <span class="material-icons-outlined text-primary mr-2">description</span>
+                Invoice Information
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Invoice Number:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.invoice_number or 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Date:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.invoice_date or 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Uploaded:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Original File:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.filename }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+                <span class="material-icons-outlined text-green-500 mr-2">store</span>
+                Vendor Information
+            </h3>
+            <div class="space-y-2">
+                <p class="text-text-light-secondary dark:text-dark-secondary"><strong>Name:</strong> {{ invoice.vendor_name or 'N/A' }}</p>
+                <p class="text-text-light-secondary dark:text-dark-secondary"><strong>Address:</strong> {{ invoice.vendor_address or 'N/A' }}</p>
+            </div>
+        </div>
+
+        <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+                <span class="material-icons-outlined text-blue-500 mr-2">person</span>
+                Customer Information
+            </h3>
+            <div class="space-y-2">
+                <p class="text-text-light-secondary dark:text-dark-secondary"><strong>Name:</strong> {{ invoice.customer_name or 'N/A' }}</p>
+                <p class="text-text-light-secondary dark:text-dark-secondary"><strong>Address:</strong> {{ invoice.customer_address or 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+                <span class="material-icons-outlined text-yellow-500 mr-2">list</span>
+                Line Items
+            </h3>
+            {% set items = invoice.get_items() %}
+            {% if items %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="border-b border-border-light dark:border-border-dark">
+                        <tr class="text-left">
+                            <th class="pb-2 text-text-light-secondary dark:text-dark-secondary text-sm">Description</th>
+                            <th class="pb-2 text-text-light-secondary dark:text-dark-secondary text-sm">Qty</th>
+                            <th class="pb-2 text-text-light-secondary dark:text-dark-secondary text-sm">Price</th>
+                            <th class="pb-2 text-text-light-secondary dark:text-dark-secondary text-sm">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="border-b border-border-light dark:border-border-dark">
+                            <td class="py-2 text-text-light-primary dark:text-dark-primary">{{ item.description or 'N/A' }}</td>
+                            <td class="py-2 text-text-light-secondary dark:text-dark-secondary">{{ item.quantity or 'N/A' }}</td>
+                            <td class="py-2 text-text-light-secondary dark:text-dark-secondary">{{ item.unit_price or 'N/A' }}</td>
+                            <td class="py-2 text-text-light-primary dark:text-dark-primary font-medium">{{ item.total or 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-text-light-secondary dark:text-dark-secondary">No items found</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+                <span class="material-icons-outlined text-red-500 mr-2">payments</span>
+                Financial Summary
+            </h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Subtotal:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.subtotal or 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-text-light-secondary dark:text-dark-secondary">Tax:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-medium">{{ invoice.tax_amount or 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between pt-3 border-t border-border-light dark:border-border-dark">
+                    <span class="text-text-light-primary dark:text-dark-primary font-bold text-lg">Total:</span>
+                    <span class="text-text-light-primary dark:text-dark-primary font-bold text-lg">{{ invoice.total_amount or 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-card-light dark:bg-card-dark backdrop-blur-xl border border-border-light dark:border-border-dark rounded-xl shadow-lg p-6">
+    <h3 class="text-xl font-semibold text-text-light-primary dark:text-dark-primary mb-4 flex items-center">
+        <span class="material-icons-outlined text-primary mr-2">preview</span>
+        Invoice Preview
+    </h3>
+    <div class="text-center">
+        {% if invoice.file_path.endswith('.pdf') %}
+        <p class="text-text-light-secondary dark:text-dark-secondary">
+            PDF preview not available. 
+            <a href="{{ url_for('static', filename='uploads/' + invoice.file_path) }}" target="_blank" class="text-primary font-semibold hover:underline">
+                Download PDF
+            </a>
+        </p>
+        {% else %}
+        <img src="{{ url_for('static', filename='uploads/' + invoice.file_path) }}" 
+             class="max-w-full h-auto rounded-lg shadow-lg" alt="Invoice" style="max-height: 600px;">
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
